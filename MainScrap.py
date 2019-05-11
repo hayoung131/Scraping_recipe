@@ -15,7 +15,7 @@ import re
 # import cook_info
 # import ingredient
 # import cooking_step
-# import cooking_tippp
+import cooking_tip
 
 
 base_url="http://www.10000recipe.com/recipe/list.html?order=accuracy&page={}"
@@ -29,6 +29,9 @@ def list_getter() :
 
 
         linkList.append(a)
+
+def scrapingRecipe():
+    a_cooking_tip = cooking_tip.cooking_tip_scrap(bs)  # 요리 팁
 
 for i in range(100,102):
     linkList = list()
@@ -54,7 +57,7 @@ for i in range(100,102):
         # if(checkRecipe() == 0):  # checkRecipe()의 리턴값이 0이면 크롤링안하고 continue.
         #     continue
 
-        # scrapingRecipe()
+        scrapingRecipe()
 
         print('     ',i+1, '번째 레시피')
 

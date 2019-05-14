@@ -13,7 +13,7 @@ import re
 
 # import title
 # import cook_info
-# import ingredient
+import ingredient
 # import cooking_step
 import cooking_tip
 
@@ -32,6 +32,7 @@ def list_getter() :
 
 def scrapingRecipe():
     a_cooking_tip = cooking_tip.cooking_tip_scrap(bs)  # 요리 팁
+    a_ingredient = ingredient.ingre_scrap(bs, bs, serving) #재료    
 
 for i in range(100,102):
     linkList = list()

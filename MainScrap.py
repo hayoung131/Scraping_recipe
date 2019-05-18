@@ -4,23 +4,47 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from urllib.request import Request, urlopen
 # import sys
 # reload(sys)
 import time
-from urllib.request import Request, urlopen
 import pymysql.cursors
 import re
-
-# import title
-# import cook_info
+import title
+import cook_info
 import ingredient
-# import cooking_step
+import cooking_step
 import cooking_tip
 
 
+#sys.setdefaultencoding('utf-8')
+
+
+#Chrome의 경우 아까 받은 chromedriver의 위치를 지정해준다.
+
+# driver = webdriver.Chrome('C:\Chrome_Driver\chromedriver.exe') #driver는 그냥 웹저버의 객체이름임.
+# driver.implicitly_wait(3) #암묵적으로 웹 자원 로드를 위해 3초까지 기다려 준다.
+
+
+# driver.get("http://www.10000recipe.com/recipe/6902125")
+# time.sleep(1)
+# webdriver.Chrome(path)는, 크롬드라이버로 크롬브라우저를 제어할 수 있는 창을 띄운다.
+# 조금만 기다리면 selenium으로 제어할 수 있는 브라우저 새창이 뜬다
+# 자동화된 테스트 소프트웨어에 의해 제어되고 있다는 말은 셀레니움으로 해당 브라우저를 제어할 수 있다는 말.
+#
+#pymysql.connect()메소드를 사용하여mysql에 connect 한다. 호스트명, 로그인, 암호, 접속할 DB 등을 파라미터로 지정한다.
+connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='1234',
+                             db='recipedata',
+                             # charset='utf-8'
+                             )
+
+# source = driver.page_source
+# soup = BeautifulSoup(source, "html.parser")
+
 base_url="http://www.10000recipe.com/recipe/list.html?order=accuracy&page={}"
 
-# 레시피 링크가있는 돔 객체의 href를 뽑아내어 링크로 이루어진 list생성
 def list_getter() :
     for k in range(len(li)) :
        # a=li[k].select("a").get_attribute('href')
@@ -30,18 +54,133 @@ def list_getter() :
 
         linkList.append(a)
 
-def scrapingRecipe():
-    a_cooking_tip = cooking_tip.cooking_tip_scrap(bs)  # 요리 팁
-    a_ingredient = ingredient.ingre_scrap(bs, bs, serving) #재료    
 
-for i in range(100,102):
+def checkRecipe():
+
+    # contents_area > div.view_reply.st2
+    #b = list()
+    count = 0
+
+
+    # if soup.find("dl", {"class": "view_step_tip"}) :
+    # <img src="http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png">
+    if (bs.select('#contents_area > div.view_reply.st2 > div.reply_tit')):  # 후기댓글이 있는경우!
+        if (bs.find("div", {"class": "view_btn_more"})):  # 후기댓글 전체보기 버튼이 있다면
+            replyMore1 = bs.select(
+                '#contents_area > div.view_reply.st2 > div > div.media.reply_list')  # replyMore1 = 후기댓글 부분에 더보기 버튼을 누르지 않았을때 보이는 부분만을 가져옴!
+
+            replyMore2 = bs.select('#moreViewReviewList > div.media.reply_list')  # replyMore2 = 더보기 버튼을 눌렀을때 나오는 후기댓글들을 가져옴!
+
+            # star = soup.find_all("img")
+            for star in bs.find_all("img"):  # img태그가 있는 부분을 모두 가져온다.
+                if (star.get("src") == "http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png"):   #  img태그 내용들중 각 이미지의 src부분이 노란색 별일때만 count++ 한다.
+                    count = count + 1
+
+            print ('전체보기버튼이 있습니다')
+            print ('별 개수', count)
+            replyNum = len(replyMore1) + len(replyMore2)  # 더보기 안눌렀을때 후기글 수 + 더보기 눌렀을때 후기글 수
+            print ('레시피의 후기글 수 :', replyNum)
+            print ('별점 평균 :', round(float(count) / replyNum, 2))
+
+
+        else:  # 후기댓글 전체보기 버튼이 없다면
+            reply = bs.select(
+                '#contents_area > div.view_reply.st2 > div > div.media.reply_list')  # reply = 후기글 수.
+            replyNum = len(reply)
+            for star in bs.find_all("img"):
+                if (star.get("src") == "http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png"): #위의 노란 별 개수 세는것과 같은 코드.
+                    count = count + 1
+            print ('전체보기 버튼이 없습니다.')
+            print ('별 개수', count)
+            print ('레시피의 후기글 수 :', replyNum)
+            print ('별점 평균 :', round(float(count) / replyNum, 2))
+
+        if (replyNum < 1 or round(float(count) / replyNum, 2) < 1): #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
+            print ('댓글수 :', replyNum, '별점 평균 :', round(float(count) / replyNum, 2), '크롤링 안하고 그냥 넘어가기.')
+            return 0  # 크롤링 안할때는 0을 리턴하도록 한다.
+        else:
+            print ('크롤링 합니다.')
+            return 1  # 크롤링 할때는 1을 리턴하도록 한다.
+
+    else:
+        noReply = 0
+
+        print ('레시피의 후기글 수 :', noReply, '크롤링 안하고 넘어가기')
+        return 0
+
+def scrapingRecipe(id_count ,id_title_count):
+
+    a_title = title.title_scrap(bs,bs) #제목
+    #ttttitle = "임시 제목"
+
+    a_cooking_info = cook_info.info_scrap(bs) #몇인분,시간,난이도
+
+    serving = a_cooking_info.cooking_info_rt(0) #몇인분에 대한 정보를 변수에 넣음
+
+    a_ingredient = ingredient.ingre_scrap(bs, bs, serving) #재료
+
+    a_cooking_step = cooking_step.cooking_step_scrap(bs) #조리과정
+
+    a_cooking_tip = cooking_tip.cooking_tip_scrap(bs) #요리 팁
+
+
+    # print(a_ingredient.rt_dic_i())
+    # print(a_ingredient.ingredient_dic.keys())
+    # print(a_ingredient.ingredient_rt(1,2))
+    # for cc in a_ingredient.ingredient_dic.keys():
+    #     for dd in range(3):
+    #         print(a_ingredient.ingredient_dic[cc][dd])
+    # print(a_ingredient.ingredient_dic[0][0])
+    # print(a_ingredient.ingredient_dic[0][1])
+    # print(a_ingredient.ingredient_dic[0][2])
+
+
+    #이거는 기본 레시피테이블에 넣을 것들
+
+    try:
+
+        with connection.cursor() as cursor:
+            # Create a new record
+            sql = "INSERT INTO cooking_ingredients (recipe_id,cooking_title, cooking_steps, cooking_tips, servings, cooking_time, cooking_level) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            cursor.execute(sql,(id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(0), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2)))
+
+    #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
+    #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
+    #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
+            ############################################이부분부터####################################################################
+            for num in a_ingredient.ingredient_dic.keys():
+                # Create a new record
+                sql = "INSERT INTO recipe_ingredient(recipe_id,searching_ingredient,amount,measu) VALUES (%s,%s,%s,%s)"
+                cursor.execute(sql, ( id_count, a_ingredient.ingredient_rt(num, 0),
+                                     a_ingredient.ingredient_rt(num, 1),
+                                     a_ingredient.ingredient_rt(num, 2)))  #자꾸 널 값으로 뜸,,,
+
+
+            sql = "INSERT INTO title(recipe_id,title_id,searching_title,searching_tag) VALUES (%s,%s,%s,%s)"
+            cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(),a_title.tag_rt(bs)))
+
+            #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
+            #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
+            #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
+            #
+
+        connection.commit()
+#########################################3요기까지################################################################################################
+
+    finally:
+         connection.close()
+
+id_count = 0 ##############################################################이 변수 추가해씀!
+
+id_title_count = 0
+
+for i in range(100, 102):
     linkList = list()
     i += 1  # 1
     print('현재 페이지 : ', i)
     url = base_url.format(i)
-    re=Request(url)
-
-    res1=urlopen(re)  # 첫 페이지 출력됨.
+    re = Request(url)
+    res1 = urlopen(re)  # 첫 페이지 출력됨.
     bs1 = BeautifulSoup(res1, 'html.parser')
     # 레시피 리스트 돔객체 저장
     li = bs1.select(
@@ -50,16 +189,20 @@ for i in range(100,102):
     print('현재 리스트 길이: ', len(linkList))
     print(linkList)
     for i in range(len(linkList)):
+        req = Request(linkList[i])
+        time.sleep(1)
+        res = urlopen(req)
+        bs = BeautifulSoup(res,'html.parser')
+        # source = driver.page_source
+        # soup = BeautifulSoup(source, "html.parser")
+        #checkRecipe()
+        if(checkRecipe() == 0):  # checkRecipe()의 리턴값이 0이면 크롤링안하고 continue.
 
-        req=Request(linkList[i])
-
-        res=urlopen(req)
-        bs = BeautifulSoup(res, 'html.parser')
-        # if(checkRecipe() == 0):  # checkRecipe()의 리턴값이 0이면 크롤링안하고 continue.
-        #     continue
-
-        scrapingRecipe()
-
-        print('     ',i+1, '번째 레시피')
-
+            continue
+        time.sleep(10)
+        scrapingRecipe(id_count, id_title_count)
+        id_title_count = id_title_count + 1
+        id_count = id_count + 1
+        print(i + 1, '번째 레시피')
+        print('++++++++++++++++++++++++++++++++++++++++++++++')
 

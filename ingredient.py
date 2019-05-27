@@ -36,7 +36,7 @@ class ingre_scrap:
                 self.final_ingredient = [0, 0, 0]
             for i in range(len(self.cooking_ingredient_all)):
                 # cooking_ingredients[i].text.rstrip()
-<<<<<<< HEAD
+
                 self.aa.append(self.cooking_ingredients[i].text)
                 # print i + 1, '번째 재료', aa[i]  # ***********이거 안됨 개빡침
                 # print " ".join(aa[i].split())
@@ -50,7 +50,7 @@ class ingre_scrap:
                 # print amount_measure
 
                 ######## 이제 여기서부터 숫자랑 단위 분리하는 작업.   ########
-=======
+
                 self.aa.append(self.cooking_ingredient_all[i].text)  # aa리스트가 a리스트
                 self.c.append(" ".join(self.aa[i].split()).split())  # [감자,30kg] 이런식 하나씩 ! 받음
 
@@ -74,7 +74,7 @@ class ingre_scrap:
             #------------------------------------------------------------------------------------------------------------------------------
             ####### 이제 여기서부터 숫자랑 단위 분리하는 작업.   ########
             for i in range(len(self.amount_measure)):
->>>>>>> feature
+
                 s = str("".join(self.amount_measure[i]))  # str은 밑에 한글 인식을 해야하기 때문에 문자열로 바꿔둠 그냥 놔두면 ex4513321이렇게 이상하게 나옴
                 # print s, '이게 현재 s에 들어있는 값임'
                 # re.compile(검색할 문자열) : 이 함수는 정규식 패턴을 입력으로 받아들여 정규식 객체를 리턴함. (re.RegexObject 클래스 객체)
@@ -83,18 +83,18 @@ class ingre_scrap:
                 # 한글 [ㄱ-ㅣ가-힣]+
                 amount = detach.sub('', s)  # 한글과 띄어쓰기를 제외한 모든 부분을 제거 //숫자만 나오게
                 measu = ''.join(detach.findall(s))  # 정규식에 일치되는 부분을 리스트 형태로 저장 //숫자제외 나머지
-<<<<<<< HEAD
+
                 self.final_ingredient[2] = measu
                 # print (num)
                 if amount == '':  # 한글로만 되어있을 경우 약간 조금 등등
                     self.final_ingredient[1] = '0'  # 0l 이라는 문자를 넣는다.
-=======
+
 
                 # print (num)
                 if amount == '':  # 한글로만 되어있을 경우 약간 조금 등등
                     self.amount_list.append('') #양 부분에 빈칸을 넣는다
                     self.measu_list.append(measu) #약간, 조금 부분을 넣는다.
->>>>>>> feature
+
                 # measu = ''.join(detach.findall(s))  # 정규식에 일치되는 부분을 리스트 형태로 저장 //숫자제외 나머지
                 # self.final_ingredient[2] = measu
 
@@ -108,7 +108,7 @@ class ingre_scrap:
                         math = round(math, 2)  # 위의 결과값에서 소수점 2자리까지만 나오게 함
 
                         if math <= 0.0:
-<<<<<<< HEAD
+
                             self.final_ingredient[1] = '0'
                             self.final_ingredient[2] = '소량'
                         else:
@@ -122,7 +122,7 @@ class ingre_scrap:
                         # print final_ingredient[1], '제발!!!!!!!!!!!!!1'
 
 
-=======
+
                             self.amount_list.append('0')
                             self.measu_list.append('소량')
                         else:
@@ -145,13 +145,12 @@ class ingre_scrap:
             sum.append(self.measu_list[i])
             self.ingredient_dic[i] = sum
         print(self.ingredient_dic)
->>>>>>> feature
+
                          # print ''.join(measu)
 
                         #print final_ingredient, '이거는 각 재료들끼리 리스트!!'
 
 
-<<<<<<< HEAD
                     self.ingredient_dic[i] = self.final_ingredient
 
                     print (i + 1, "번째 재료 :   ", self.final_ingredient[0], self.final_ingredient[1], self.final_ingredient[2])
@@ -160,7 +159,7 @@ class ingre_scrap:
                     #print ''.join(self.ingredient_dic[0][0]) #이거는 각 딕셔너리안의 리스트로 된 값의 첫번째가 뽑아지는지 확인한것..!
 
                 
-=======
+
 
 
                     # print (i + 1, "번째 재료 :   ", self.final_ingredient[0], self.final_ingredient[1], self.final_ingredient[2])
@@ -168,7 +167,7 @@ class ingre_scrap:
                     # print(self.ingredient_dic)  # 이게 딕셔너리!!
                     # #print ''.join(self.ingredient_dic[0][0]) #이거는 각 딕셔너리안의 리스트로 된 값의 첫번째가 뽑아지는지 확인한것..!
 
->>>>>>> feature
+
     def rt_dic_i(self):
         return len(self.ingredient_dic)
         return len(self.final_ingredient)

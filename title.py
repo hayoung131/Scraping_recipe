@@ -55,7 +55,7 @@ class title_scrap:
                 dict_tag = eval(string_tag) #딕셔너리형식으로된 문자열을 딕셔너리로 형전환.
                 for j in range(len(dict_tag['return_object']['sentence'])):
                     for i in range(len(dict_tag['return_object']['sentence'][j]['morp'])):
-                        if(dict_tag['return_object']['sentence'][j]['morp'][i]['type'] == 'NNG' or dict_tag['return_object']['sentence'][0]['morp'][i]['type']=='NNP'):
+                        if(dict_tag['return_object']['sentence'][j]['morp'][i]['type'] == 'NNG' or dict_tag['return_object']['sentence'][j]['morp'][i]['type']=='NNP'):
                             noun_text=noun_text+dict_tag['return_object']['sentence'][j]['morp'][i]['lemma']+' '
             except SyntaxError:
                 string_tag = '얘는 딕셔너리로 바꿀 수 없습니다.'

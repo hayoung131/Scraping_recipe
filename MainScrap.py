@@ -35,7 +35,7 @@ import cooking_tip
 #pymysql.connect()메소드를 사용하여mysql에 connect 한다. 호스트명, 로그인, 암호, 접속할 DB 등을 파라미터로 지정한다.
 connection = pymysql.connect(host='localhost',
                              user='root',
-                             password='1234',
+                             password='111111',
                              db='recipedata',
                              # charset='utf-8'
                              )
@@ -56,11 +56,11 @@ def list_getter() :
 
 
 def checkRecipe():
-
+    global replyNum
+    global star_score_avg
     # contents_area > div.view_reply.st2
     #b = list()
     count = 0
-
 
     # if soup.find("dl", {"class": "view_step_tip"}) :
     # <img src="http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png">
@@ -77,10 +77,11 @@ def checkRecipe():
                     count = count + 1
 
             print ('전체보기버튼이 있습니다')
-            print ('별 개수', count)
+            print ('별 개수', count)#15
             replyNum = len(replyMore1) + len(replyMore2)  # 더보기 안눌렀을때 후기글 수 + 더보기 눌렀을때 후기글 수
-            print ('레시피의 후기글 수 :', replyNum)
-            print ('별점 평균 :', round(float(count) / replyNum, 2))
+            star_score_avg= round(float(count) / replyNum, 2)
+            print ('레시피의 후기글 수 :', replyNum)#3
+            print ('별점 평균 :', star_score_avg)
 
 
         else:  # 후기댓글 전체보기 버튼이 없다면
@@ -90,17 +91,19 @@ def checkRecipe():
             for star in bs.find_all("img"):
                 if (star.get("src") == "http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png"): #위의 노란 별 개수 세는것과 같은 코드.
                     count = count + 1
+
+            star_score_avg = round(float(count) / replyNum, 2)
             print ('전체보기 버튼이 없습니다.')
             print ('별 개수', count)
             print ('레시피의 후기글 수 :', replyNum)
-            print ('별점 평균 :', round(float(count) / replyNum, 2))
+            print ('별점 평균 :', star_score_avg)
 
-        if (replyNum < 1 or round(float(count) / replyNum, 2) < 1): #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
-            print ('댓글수 :', replyNum, '별점 평균 :', round(float(count) / replyNum, 2), '크롤링 안하고 그냥 넘어가기.')
+        if (replyNum < 1 or star_score_avg < 4.5): #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
+            print ('댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 안하고 그냥 넘어가기.')
             return 0  # 크롤링 안할때는 0을 리턴하도록 한다.
         else:
             print ('크롤링 합니다.')
-            return 1  # 크롤링 할때는 1을 리턴하도록 한다.
+            return 1 # 크롤링 할때는 1을 리턴하도록 한다.
 
     else:
         noReply = 0
@@ -137,50 +140,57 @@ def scrapingRecipe(id_count ,id_title_count):
 
     #이거는 기본 레시피테이블에 넣을 것들
 
-    try:
 
-        with connection.cursor() as cursor:
+    cursor=connection.cursor()
+        # Create a new record
+    sql = "INSERT INTO mainrecipe (recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+    cursor.execute(sql,(id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i]))
+
+#     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
+#     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
+#     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
+    ##############title 테이블에 삽입
+    sql = "INSERT INTO title(recipe_id,title_id,searching_title) VALUES (%s,%s,%s)"
+    cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(bs)))
+
+    ################comments 테이블에 삽입
+    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id) VALUES(%s,%s,%s)"
+    cursor.execute(sql, (replyNum, star_score_avg, id_count))
+
+
+        ############################################이부분부터####################################################################
+    for num in a_ingredient.ingredient_dic.keys():
             # Create a new record
-            sql = "INSERT INTO cooking_ingredients (recipe_id,cooking_title, cooking_steps, cooking_tips, servings, cooking_time, cooking_level) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            cursor.execute(sql,(id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(0), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2)))
-
-    #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
-    #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
-    #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
-            ############################################이부분부터####################################################################
-            for num in a_ingredient.ingredient_dic.keys():
-                # Create a new record
-                sql = "INSERT INTO recipe_ingredient(recipe_id,searching_ingredient,amount,measu) VALUES (%s,%s,%s,%s)"
-                cursor.execute(sql, ( id_count, a_ingredient.ingredient_rt(num, 0),
-                                     a_ingredient.ingredient_rt(num, 1),
-                                     a_ingredient.ingredient_rt(num, 2)))  #자꾸 널 값으로 뜸,,,
+        ####################재료 테이블에 삽입
+        sql = "INSERT INTO recipe_ingredient(recipe_id,searching_ingredient,amount,measu) VALUES (%s,%s,%s,%s)"
+        cursor.execute(sql, ( id_count, a_ingredient.ingredient_rt(num, 0),
+                                 a_ingredient.ingredient_rt(num, 1),
+                                 a_ingredient.ingredient_rt(num, 2)))  #자꾸 널 값으로 뜸,,,
 
 
-            sql = "INSERT INTO title(recipe_id,title_id,searching_title,searching_tag) VALUES (%s,%s,%s,%s)"
-            cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(),a_title.tag_rt(bs)))
-
-            #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
-            #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
-            #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
-            #
-
-        connection.commit()
+        #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
+        #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
+        #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
+        #
+    connection.commit()
 #########################################3요기까지################################################################################################
 
-    finally:
-         connection.close()
+
+#     connection.close()
 
 id_count = 0 ##############################################################이 변수 추가해씀!
 
 id_title_count = 0
 
-for i in range(100, 102):
+for i in range(102,104):
+    replyNum = 0
+    star_score_avg = 0.0
     linkList = list()
     i += 1  # 1
     print('현재 페이지 : ', i)
     url = base_url.format(i)
-    re = Request(url)
-    res1 = urlopen(re)  # 첫 페이지 출력됨.
+    re=Request(url)
+    res1=urlopen(re)  # 첫 페이지 출력됨.
     bs1 = BeautifulSoup(res1, 'html.parser')
     # 레시피 리스트 돔객체 저장
     li = bs1.select(
@@ -195,14 +205,15 @@ for i in range(100, 102):
         bs = BeautifulSoup(res,'html.parser')
         # source = driver.page_source
         # soup = BeautifulSoup(source, "html.parser")
-        #checkRecipe()
+        #scrapingPermit, star_score_avg2, replyNum2 =checkRecipe()
         if(checkRecipe() == 0):  # checkRecipe()의 리턴값이 0이면 크롤링안하고 continue.
 
             continue
         time.sleep(10)
         scrapingRecipe(id_count, id_title_count)
-        id_title_count = id_title_count + 1
+
+        id_title_count = id_title_count + 1########################################
         id_count = id_count + 1
         print(i + 1, '번째 레시피')
         print('++++++++++++++++++++++++++++++++++++++++++++++')
-
+connection.close()

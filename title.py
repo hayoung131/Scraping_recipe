@@ -170,12 +170,16 @@ class title_scrap:
         print (' '.join(set(final_foodName_list))) #중복 제거
         self.final_title = ' '.join(set(final_foodName_list));
 
-    def title_rt(self):
-        return self.final_title
-    def real_title_rt(self):
-        return self.real_title
-    def tag_rt(self,soup):
-        if (soup.find("div", {"class": "view_tag"})):
-            return self.Noun_food_tag
+    def title_rt(self,soup):#전처리한 제목+태그 합친것 보내기
+        if(soup.find("div", {"class": "view_tag"})):
+            return self.Noun_food_tag+self.final_title
         else:
-            return "No tag"
+            print("태그없음. 전처리제목만 보내겠음")
+            return self.final_title
+    def real_title_rt(self): #전처리하지않은 제목
+        return self.real_title
+    # def tag_rt(self,soup):
+    #     if (soup.find("div", {"class": "view_tag"})):
+    #         return self.Noun_food_tag
+    #     else:
+    #         return "No tag"

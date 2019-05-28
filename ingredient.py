@@ -121,18 +121,6 @@ class ingre_scrap:
 
                         # print final_ingredient[1], '제발!!!!!!!!!!!!!1'
 
-
-
-                            self.amount_list.append('0')
-                            self.measu_list.append('소량')
-                        else:
-                            self.amount_list.append(math)
-                            measu = ''.join(detach.findall(s))
-                            self.measu_list.append(measu)
-                    except TypeError:
-                            self.amount_list.append('123456')
-                            self.measu_list.append('Type Error')
-
                         # print final_ingredient[1], '제발!!!!!!!!!!!!!1'
 
         print(self.d)

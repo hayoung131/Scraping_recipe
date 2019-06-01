@@ -15,6 +15,7 @@ import cook_info
 import ingredient
 import cooking_step
 import cooking_tip
+import hit_count
 
 
 #sys.setdefaultencoding('utf-8')
@@ -35,7 +36,7 @@ import cooking_tip
 #pymysql.connect()메소드를 사용하여mysql에 connect 한다. 호스트명, 로그인, 암호, 접속할 DB 등을 파라미터로 지정한다.
 connection = pymysql.connect(host='localhost',
                              user='root',
-                             password='111111',
+                             password='1234',
                              db='recipedata',
                              # charset='utf-8'
                              )
@@ -113,6 +114,8 @@ def checkRecipe():
 
 def scrapingRecipe(id_count ,id_title_count):
 
+    a_hit_count = hit_count.hit_count_scrap(bs)
+
     a_title = title.title_scrap(bs,bs) #제목
     #ttttitle = "임시 제목"
 
@@ -141,7 +144,7 @@ def scrapingRecipe(id_count ,id_title_count):
     #이거는 기본 레시피테이블에 넣을 것들
 
 
-    cursor=connection.cursor()
+    cursor = connection.cursor()
         # Create a new record
     sql = "INSERT INTO mainrecipe (recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url) VALUES (%s,%s,%s,%s,%s,%s,%s)"
     cursor.execute(sql,(id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i]))

@@ -63,7 +63,7 @@ def checkRecipe():
     #b = list()
     count = 0
     hit_check = hit_count.hit_count_scrap(bs)
-    hit_standard = int( hit_check.hit_count_rt())  # 여기서도 조회수를 뽑아낸는 메소드를 호출함.
+    hit_standard = int(hit_check.hit_count_rt())  # 여기서도 조회수를 뽑아낸는 메소드를 호출함.
 
 
     # if soup.find("dl", {"class": "view_step_tip"}) :
@@ -132,8 +132,8 @@ def scrapingRecipe(id_count ,id_title_count):
 
     a_cooking_tip = cooking_tip.cooking_tip_scrap(bs) #요리 팁
 
-    hit = a_hit_count.hit_count_rt()
-    importance = eval(replyNum+'+'+hit+'+'+star_score_avg) #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
+    hit = int(a_hit_count.hit_count_rt())
+    importance = replyNum+hit+star_score_avg #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
     # print(a_ingredient.rt_dic_i())
     # print(a_ingredient.ingredient_dic.keys())
     # print(a_ingredient.ingredient_rt(1,2))
@@ -161,8 +161,8 @@ def scrapingRecipe(id_count ,id_title_count):
     cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(bs)))
 
     ################comments 테이블에 삽입
-    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id) VALUES(%s,%s,%s)"
-    cursor.execute(sql, (replyNum, star_score_avg, id_count))
+    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id,importance) VALUES(%s,%s,%s,%s)"
+    cursor.execute(sql, (replyNum, star_score_avg, id_count, importance))
 
 
         ############################################이부분부터####################################################################

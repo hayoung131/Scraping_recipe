@@ -14,7 +14,7 @@ class hit_count_scrap:
             self.hit_count = soup.select('#contents_area > div.view2_pic > div.view_cate.st2 > div > span')
             for i in range(len(self.hit_count)):
                 self.hit_count = self.hit_count[i].text
-                print("조회수 : ",self.hit_count)
+                print("조회수 : ", self.hit_count)
 
 
     def hit_count_rt(self):

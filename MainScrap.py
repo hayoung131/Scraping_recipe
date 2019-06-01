@@ -97,23 +97,29 @@ def checkRecipe():
                     count = count + 1
 
             star_score_avg = round(float(count) / replyNum, 2)
-            print ('전체보기 버튼이 없습니다.')
-            print ('별 개수', count)
-            print ('레시피의 후기글 수 :', replyNum)
-            print ('별점 평균 :', star_score_avg)
+            print('전체보기 버튼이 없습니다.')
+            print('별 개수', count)
+            print('레시피의 후기글 수 :', replyNum)
+            print('별점 평균 :', star_score_avg)
 
-        if (replyNum < 1 or star_score_avg < 4.5 or hit_standard <1000):  #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
-            print ('댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 안하고 그냥 넘어가기.')
-            return 0  # 크롤링 안할때는 0을 리턴하도록 한다.
-        else:
-            print ('크롤링 합니다.')
-            return 1 # 크롤링 할때는 1을 리턴하도록 한다.
-
+    if (hit_standard >= 1000):  #조회수가 1000 이상 일 때
+        if (replyNum >= 1 or star_score_avg >= 4):  # 후기글 수가 1개보다 크고 별점이 4점이 넘으면 크롤링
+            print('조회수가 1000이 넘습니다. 댓글도 있습니다.','댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 합니다.')
+            return 1  # 크롤링 할때는 1을 리턴하도록 한다.
+        else:  #후기글 수가
+            print('조회수가 1000이 넘지만 댓글은 없습니다.','댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 합니다.')
+            return 1
+        # print('조회수가 1000이 넘습니다.','댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 합니다.')
+        # return 1
     else:
-        noReply = 0
+        if ( replyNum >= 1 or star_score_avg >= 4 ):
+            print('크롤링 합니다.')
+            return 1  # 1을 반환하면 크롤링
+        else :
+            print("크롤링 안하고 넘어갑니다.")
+            return 0  # 0을 반환시켜 크롤링 안하게 함.
 
-        print ('레시피의 후기글 수 :', noReply, '크롤링 안하고 넘어가기')
-        return 0
+
 
 def scrapingRecipe(id_count ,id_title_count):
 
@@ -133,7 +139,8 @@ def scrapingRecipe(id_count ,id_title_count):
     a_cooking_tip = cooking_tip.cooking_tip_scrap(bs) #요리 팁
 
     hit = int(a_hit_count.hit_count_rt())
-    importance = replyNum+hit+star_score_avg #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
+
+    importance = replyNum*0.5 + (replyNum*0.3)*star_score_avg + hit*0.0005  #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
     # print(a_ingredient.rt_dic_i())
     # print(a_ingredient.ingredient_dic.keys())
     # print(a_ingredient.ingredient_rt(1,2))
@@ -150,8 +157,8 @@ def scrapingRecipe(id_count ,id_title_count):
 
     cursor = connection.cursor()
         # Create a new record
-    sql = "INSERT INTO mainrecipe (recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-    cursor.execute(sql,(id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i]))
+    sql = "INSERT INTO mainrecipe(recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url,importance) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+    cursor.execute(sql, (id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i],importance))
 
 #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
 #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
@@ -161,8 +168,8 @@ def scrapingRecipe(id_count ,id_title_count):
     cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(bs)))
 
     ################comments 테이블에 삽입
-    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id,importance) VALUES(%s,%s,%s,%s)"
-    cursor.execute(sql, (replyNum, star_score_avg, id_count, importance))
+    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id) VALUES(%s,%s,%s)"
+    cursor.execute(sql, (replyNum, star_score_avg, id_count))
 
 
         ############################################이부분부터####################################################################
@@ -189,15 +196,15 @@ id_count = 0 ##############################################################이 �
 
 id_title_count = 0
 
-for i in range(102,104):
+for i in range(26,29):
     replyNum = 0
     star_score_avg = 0.0
     linkList = list()
     i += 1  # 1
     print('현재 페이지 : ', i)
     url = base_url.format(i)
-    re=Request(url)
-    res1=urlopen(re)  # 첫 페이지 출력됨.
+    re = Request(url)
+    res1 = urlopen(re)  # 첫 페이지 출력됨.
     bs1 = BeautifulSoup(res1, 'html.parser')
     # 레시피 리스트 돔객체 저장
     li = bs1.select(

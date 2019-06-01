@@ -62,6 +62,9 @@ def checkRecipe():
     # contents_area > div.view_reply.st2
     #b = list()
     count = 0
+    hit_check = hit_count.hit_count_scrap(bs)
+    hit_standard = int( hit_check.hit_count_rt())  # 여기서도 조회수를 뽑아낸는 메소드를 호출함.
+
 
     # if soup.find("dl", {"class": "view_step_tip"}) :
     # <img src="http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png">
@@ -99,7 +102,7 @@ def checkRecipe():
             print ('레시피의 후기글 수 :', replyNum)
             print ('별점 평균 :', star_score_avg)
 
-        if (replyNum < 1 or star_score_avg < 4.5): #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
+        if (replyNum < 1 or star_score_avg < 4.5 or hit_standard <1000):  #후기글 수가 10개보다 작거나 별점평균이 4.5 밑이면 크롤링 안하기
             print ('댓글수 :', replyNum, '별점 평균 :', star_score_avg, '크롤링 안하고 그냥 넘어가기.')
             return 0  # 크롤링 안할때는 0을 리턴하도록 한다.
         else:
@@ -129,7 +132,8 @@ def scrapingRecipe(id_count ,id_title_count):
 
     a_cooking_tip = cooking_tip.cooking_tip_scrap(bs) #요리 팁
 
-
+    hit = a_hit_count.hit_count_rt()
+    importance = eval(replyNum+'+'+hit+'+'+star_score_avg) #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
     # print(a_ingredient.rt_dic_i())
     # print(a_ingredient.ingredient_dic.keys())
     # print(a_ingredient.ingredient_rt(1,2))

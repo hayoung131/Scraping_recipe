@@ -36,7 +36,7 @@ import hit_count
 #pymysql.connect()메소드를 사용하여mysql에 connect 한다. 호스트명, 로그인, 암호, 접속할 DB 등을 파라미터로 지정한다.
 connection = pymysql.connect(host='localhost',
                              user='root',
-                             password='1234',
+                             password='111111',
                              db='recipedata',
                              # charset='utf-8'
                              )
@@ -121,7 +121,7 @@ def checkRecipe():
 
 
 
-def scrapingRecipe(id_count ,id_title_count):
+def scrapingRecipe(recipe_id):
 
     a_hit_count = hit_count.hit_count_scrap(bs)
 
@@ -141,6 +141,9 @@ def scrapingRecipe(id_count ,id_title_count):
     hit = int(a_hit_count.hit_count_rt())
 
     importance = replyNum*0.5 + (replyNum*0.3)*star_score_avg + hit*0.0005  #댓글 수 + 조회수 + 평점에 각각의 가중치를 곱하여 계산
+
+    only_ingredient_name = a_ingredient.only_ingredient_name()
+    ingredient_name_string = ",".join(only_ingredient_name)
     # print(a_ingredient.rt_dic_i())
     # print(a_ingredient.ingredient_dic.keys())
     # print(a_ingredient.ingredient_rt(1,2))
@@ -157,19 +160,19 @@ def scrapingRecipe(id_count ,id_title_count):
 
     cursor = connection.cursor()
         # Create a new record
-    sql = "INSERT INTO mainrecipe(recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url,importance) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-    cursor.execute(sql, (id_count, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i],importance))
+    sql = "INSERT INTO mainrecipe(recipe_id,cooking_title, cooking_steps, cooking_tips, cooking_time, cooking_level,recipe_url,ingredient, ingredient_num,importance) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    cursor.execute(sql, (recipe_id, a_title.real_title_rt(), a_cooking_step.cooking_step_rt(), a_cooking_tip.cooking_tip_rt(), a_cooking_info.cooking_info_rt(1), a_cooking_info.cooking_info_rt(2),linkList[i], ingredient_name_string,len(only_ingredient_name),importance))
 
 #     # db 접속이 성공하면, connection객체로부터 cursor()메소드를 호출하여 cursor 객체를 가져온다. db커서는 fetch동작을 관리하는데 사용하는데,
 #     # 만약 db자체가 커서를 지원하지않으면, python db api에서 이 커서 동작을 emulation하게된다.
 #     # Cursor 객체의 excute()메소드를 사용하여 SQL문장을 DB서버에 보낸다.
     ##############title 테이블에 삽입
     sql = "INSERT INTO title(recipe_id,title_id,searching_title) VALUES (%s,%s,%s)"
-    cursor.execute(sql, (id_count, id_title_count, a_title.title_rt(bs)))
+    cursor.execute(sql, (recipe_id, recipe_id, a_title.title_rt(bs)))
 
     ################comments 테이블에 삽입
     sql = "INSERT INTO comments(comments, star_score_avg,recipe_id) VALUES(%s,%s,%s)"
-    cursor.execute(sql, (replyNum, star_score_avg, id_count))
+    cursor.execute(sql, (replyNum, star_score_avg, recipe_id))
 
 
         ############################################이부분부터####################################################################
@@ -177,7 +180,7 @@ def scrapingRecipe(id_count ,id_title_count):
             # Create a new record
         ####################재료 테이블에 삽입
         sql = "INSERT INTO recipe_ingredient(recipe_id,searching_ingredient,amount,measu) VALUES (%s,%s,%s,%s)"
-        cursor.execute(sql, ( id_count, a_ingredient.ingredient_rt(num, 0),
+        cursor.execute(sql, ( recipe_id, a_ingredient.ingredient_rt(num, 0),
                                  a_ingredient.ingredient_rt(num, 1),
                                  a_ingredient.ingredient_rt(num, 2)))  #자꾸 널 값으로 뜸,,,
 
@@ -191,12 +194,15 @@ def scrapingRecipe(id_count ,id_title_count):
 
 
 #     connection.close()
+cursor=connection.cursor()
+sql="select count(*) from mainrecipe"
+cursor.execute(sql) #매번 크롤링 할 때마다
 
-id_count = 0 ##############################################################이 변수 추가해씀!
+cnt=cursor.fetchall()
+recipe_id =cnt[0][0] # mainrecipe 테이블의 row 수를 반환할것. ((19,),)
+print(recipe_id)
 
-id_title_count = 0
-
-for i in range(26,29):
+for i in range(1016,1100):
     replyNum = 0
     star_score_avg = 0.0
     linkList = list()
@@ -223,11 +229,10 @@ for i in range(26,29):
         if(checkRecipe() == 0):  # checkRecipe()의 리턴값이 0이면 크롤링안하고 continue.
 
             continue
-        time.sleep(10)
-        scrapingRecipe(id_count, id_title_count)
+        time.sleep(2)
+        scrapingRecipe(recipe_id)
 
-        id_title_count = id_title_count + 1########################################
-        id_count = id_count + 1
+        recipe_id = recipe_id + 1
         print(i + 1, '번째 레시피')
         print('++++++++++++++++++++++++++++++++++++++++++++++')
 connection.close()

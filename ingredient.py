@@ -4,6 +4,8 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 #import sys
 import re
+import string
+from string import punctuation
 
 
 #sys.setdefaultencoding('utf-8')
@@ -28,7 +30,7 @@ class ingre_scrap:
         if (soup.find("div", {"id": "divConfirmedMaterialArea"})):
             # 만약 이 id를 가진 태그가 존재한다면 이부분을 실행
             self.cooking_ingredient_all = driver.select('#divConfirmedMaterialArea > ul > li')  # 이 부분이 case1 클래스가 없는 ul도 있음 그럼 다른 클래스도 있을수 있지않을까..?
-            self.cooking_ingredient_noName = driver.select('#divConfirmedMaterialArea > ul > li >span')
+            self.cooking_ingredient_noName = driver.select('#divConfirmedMaterialArea > ul > li >span')#계량만 들어가있는 리스트
 
             for i in range(len(self.cooking_ingredient_all)):
                 # cooking_ingredients[i].text.rstrip()
@@ -56,6 +58,8 @@ class ingre_scrap:
             ####### 이제 여기서부터 숫자랑 단위 분리하는 작업.   ########
             for i in range(len(self.amount_measure)):
                 s = str("".join(self.amount_measure[i]))  # str은 밑에 한글 인식을 해야하기 때문에 문자열로 바꿔둠 그냥 놔두면 ex4513321이렇게 이상하게 나옴
+                s=s.strip(punctuation)
+                print("불용어 처리를 합니다람쥐.                       ", s)
                 # print s, '이게 현재 s에 들어있는 값임'
                 # re.compile(검색할 문자열) : 이 함수는 정규식 패턴을 입력으로 받아들여 정규식 객체를 리턴함. (re.RegexObject 클래스 객체)
                 detach = re.compile('[a-zA-Z]+|[ㄱ-ㅣ가-힣]+')  # 영어와 한글제외한 (숫자)뽑아내기
@@ -90,6 +94,9 @@ class ingre_scrap:
                     except TypeError:
                             self.amount_list.append('123456')
                             self.measu_list.append('Type Error')
+                    except SyntaxError:
+                            self.amount_list.append('')
+                            self.measu_list.append('적당히')
 
                         # print final_ingredient[1], '제발!!!!!!!!!!!!!1'
 
@@ -121,3 +128,5 @@ class ingre_scrap:
     def ingredient_rt(self, i, j):
 
         return self.ingredient_dic[i][j] #딕셔너리 안에서 몇번째값의 몇번째 번지를 가져올지 정하는거
+    def only_ingredient_name(self):
+        return self.d;

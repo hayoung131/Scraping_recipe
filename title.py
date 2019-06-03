@@ -11,7 +11,7 @@ import requests#형태소분석 api는 웹으로 제공하는 서비스이기에
 import numpy as np  # 행렬 라이브러리 numpy
 import re
 
-secret_key="9004014939174099165"
+secret_key="6011420040561756864"
 morp_url="http://api.adams.ai/datamixiApi/tms?query="
 option="&lang=kor&analysis=pos&key="
 
@@ -102,7 +102,7 @@ class title_scrap:
 
             del food_tag[0]# #을 기준으로 나누다보니... 첫번째에는 공백이 들어가거든. 그래서 지워야함.
             food_tag= ' '.join(food_tag)
-            self.Noun_food_tag = morp(food_tag)
+            self.Noun_food_tag = food_tag
             li_t = title_similarity(Noun_title_sents,self.Noun_food_tag) #############################return value = 요리명 list
             final_foodName_list.extend(li_t) #최종음식이름 리스트에 저 리스트를 합치기
 
@@ -118,7 +118,7 @@ class title_scrap:
             recommand_tag=' '.join(recommand_tag)
             print (recommand_tag)
             print ('추천태그 타입이 뭐니',type(recommand_tag))
-            Noun_recommand_tag=morp(recommand_tag)
+            Noun_recommand_tag=recommand_tag
             li_rt=title_similarity(Noun_title_sents, Noun_recommand_tag)
             final_foodName_list.extend(li_rt)
 

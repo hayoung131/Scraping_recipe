@@ -48,7 +48,7 @@ class title_scrap:
             # for i in range(len(response.text)):
             #     string_tag = string_tag + response.text[i]
             string_tag = "".join(response.text)
-            print ('이거 아무것도 안나옴' , string_tag ,response.text)
+            print ('이거 아무것도 안나옴'  ,response.text)
 
             try:
                 #print eval(string_tag)
@@ -90,6 +90,8 @@ class title_scrap:
 
         #제목 크롤링  ##########################################이 위치에 있어야함.
         title_sents = soup.find("h3").text
+        title_sents = title_sents.replace('/', "")
+        title_sents = title_sents.replace('#', "")
         Noun_title_sents = morp(title_sents)
         self.real_title = soup.find("h3").text
 

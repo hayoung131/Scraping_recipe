@@ -108,19 +108,22 @@ class title_scrap:
 
 
         #추천 태그 크롤링
-        recommand_tag_crawling = soup.find("ul",{"class":"view_pdt_recipe2"}).find_all("a",{"class":"tag"})
-        if (recommand_tag_crawling):
-            recommand_tag=""
-            for i in range(len(recommand_tag_crawling)) :
-                recommand_tag=recommand_tag+recommand_tag_crawling[i].get_text() + ''
-            recommand_tag=recommand_tag.split('#')
-            del recommand_tag[0]
-            recommand_tag=' '.join(recommand_tag)
-            print (recommand_tag)
-            print ('추천태그 타입이 뭐니',type(recommand_tag))
-            Noun_recommand_tag=morp(recommand_tag)
-            li_rt=title_similarity(Noun_title_sents, Noun_recommand_tag)
-            final_foodName_list.extend(li_rt)
+        if (soup.select('ul.view_pdt_recipe2 >li> a.tag')):  # 추천태그가 있으면 크롤링한다.
+            recommand_tag_crawling = soup.find("ul", {"class": "view_pdt_recipe2"}).find_all("a", {"class": "tag"})
+            if (recommand_tag_crawling):
+                recommand_tag = ""
+                for i in range(len(recommand_tag_crawling)):
+                    recommand_tag = recommand_tag + recommand_tag_crawling[i].get_text() + ''
+                recommand_tag = recommand_tag.split('#')
+                del recommand_tag[0]
+                recommand_tag = ' '.join(recommand_tag)
+                print(recommand_tag)
+                print('추천태그 타입이 뭐니', type(recommand_tag))
+                Noun_recommand_tag = recommand_tag
+                li_rt = title_similarity(Noun_title_sents, Noun_recommand_tag)
+                final_foodName_list.extend(li_rt)
+        else:
+            Noun_recommand_tag = ''
 
 
         #추천레시피 제목 크롤링

@@ -113,7 +113,7 @@ class title_scrap:
 
 
         #추천 태그 크롤링
-<<<<<<< HEAD
+
         if (soup.select('ul.view_pdt_recipe2 >li> a.tag')):  # 추천태그가 있으면 크롤링한다.
             recommand_tag_crawling = soup.find("ul", {"class": "view_pdt_recipe2"}).find_all("a", {"class": "tag"})
             if (recommand_tag_crawling):
@@ -130,7 +130,7 @@ class title_scrap:
                 final_foodName_list.extend(li_rt)
         else:
             Noun_recommand_tag = ''
-=======
+
         recommand_tag_crawling = soup.find("ul",{"class":"view_pdt_recipe2"}).find_all("a",{"class":"tag"})
         if (recommand_tag_crawling):
             recommand_tag=""
@@ -144,7 +144,7 @@ class title_scrap:
             Noun_recommand_tag=recommand_tag
             li_rt=title_similarity(Noun_title_sents, Noun_recommand_tag)
             final_foodName_list.extend(li_rt)
->>>>>>> origin/master
+
 
 
         #추천레시피 제목 크롤링

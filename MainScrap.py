@@ -63,6 +63,7 @@ def checkRecipe():
     #b = list()
     count = 0
     hit_check = hit_count.hit_count_scrap(bs)
+    global hit_standard
     hit_standard = int(hit_check.hit_count_rt())  # 여기서도 조회수를 뽑아낸는 메소드를 호출함.
 
 
@@ -171,8 +172,8 @@ def scrapingRecipe(recipe_id):
     cursor.execute(sql, (recipe_id, recipe_id, a_title.title_rt(bs)))
 
     ################comments 테이블에 삽입
-    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id) VALUES(%s,%s,%s)"
-    cursor.execute(sql, (replyNum, star_score_avg, recipe_id))
+    sql = "INSERT INTO comments(comments, star_score_avg,recipe_id,hit_standard) VALUES(%s,%s,%s,%s)"
+    cursor.execute(sql, (replyNum, star_score_avg, recipe_id, hit_standard))
 
 
         ############################################이부분부터####################################################################

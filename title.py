@@ -12,6 +12,7 @@ import numpy as np  # 행렬 라이브러리 numpy
 import re
 
 secret_key="9004014939174099165"
+secret_key="6011420040561756864"
 morp_url="http://api.adams.ai/datamixiApi/tms?query="
 option="&lang=kor&analysis=pos&key="
 
@@ -49,6 +50,7 @@ class title_scrap:
             #     string_tag = string_tag + response.text[i]
             string_tag = "".join(response.text)
             print ('이거 아무것도 안나옴' , string_tag ,response.text)
+            print ('이거 아무것도 안나옴'  ,response.text)
 
             try:
                 #print eval(string_tag)
@@ -90,6 +92,8 @@ class title_scrap:
 
         #제목 크롤링  ##########################################이 위치에 있어야함.
         title_sents = soup.find("h3").text
+        title_sents = title_sents.replace('/', "")
+        title_sents = title_sents.replace('#', "")
         Noun_title_sents = morp(title_sents)
         self.real_title = soup.find("h3").text
 
@@ -103,11 +107,13 @@ class title_scrap:
             del food_tag[0]# #을 기준으로 나누다보니... 첫번째에는 공백이 들어가거든. 그래서 지워야함.
             food_tag= ' '.join(food_tag)
             self.Noun_food_tag = morp(food_tag)
+            self.Noun_food_tag = food_tag
             li_t = title_similarity(Noun_title_sents,self.Noun_food_tag) #############################return value = 요리명 list
             final_foodName_list.extend(li_t) #최종음식이름 리스트에 저 리스트를 합치기
 
 
         #추천 태그 크롤링
+<<<<<<< HEAD
         if (soup.select('ul.view_pdt_recipe2 >li> a.tag')):  # 추천태그가 있으면 크롤링한다.
             recommand_tag_crawling = soup.find("ul", {"class": "view_pdt_recipe2"}).find_all("a", {"class": "tag"})
             if (recommand_tag_crawling):
@@ -124,6 +130,21 @@ class title_scrap:
                 final_foodName_list.extend(li_rt)
         else:
             Noun_recommand_tag = ''
+=======
+        recommand_tag_crawling = soup.find("ul",{"class":"view_pdt_recipe2"}).find_all("a",{"class":"tag"})
+        if (recommand_tag_crawling):
+            recommand_tag=""
+            for i in range(len(recommand_tag_crawling)) :
+                recommand_tag=recommand_tag+recommand_tag_crawling[i].get_text() + ''
+            recommand_tag=recommand_tag.split('#')
+            del recommand_tag[0]
+            recommand_tag=' '.join(recommand_tag)
+            print (recommand_tag)
+            print ('추천태그 타입이 뭐니',type(recommand_tag))
+            Noun_recommand_tag=recommand_tag
+            li_rt=title_similarity(Noun_title_sents, Noun_recommand_tag)
+            final_foodName_list.extend(li_rt)
+>>>>>>> origin/master
 
 
         #추천레시피 제목 크롤링

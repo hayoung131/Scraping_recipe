@@ -11,7 +11,7 @@ import requests#형태소분석 api는 웹으로 제공하는 서비스이기에
 import numpy as np  # 행렬 라이브러리 numpy
 import re
 
-secret_key="9004014939174099165"
+#secret_key="9004014939174099165" 월 사용량 
 secret_key="6011420040561756864"
 morp_url="http://api.adams.ai/datamixiApi/tms?query="
 option="&lang=kor&analysis=pos&key="
@@ -49,8 +49,8 @@ class title_scrap:
             # for i in range(len(response.text)):
             #     string_tag = string_tag + response.text[i]
             string_tag = "".join(response.text)
-            print ('이거 아무것도 안나옴' , string_tag ,response.text)
-            print ('이거 아무것도 안나옴'  ,response.text)
+            
+            print ("morp결과                      : ",response.text)
 
             try:
                 #print eval(string_tag)
@@ -131,22 +131,7 @@ class title_scrap:
         else:
             Noun_recommand_tag = ''
 
-        recommand_tag_crawling = soup.find("ul",{"class":"view_pdt_recipe2"}).find_all("a",{"class":"tag"})
-        if (recommand_tag_crawling):
-            recommand_tag=""
-            for i in range(len(recommand_tag_crawling)) :
-                recommand_tag=recommand_tag+recommand_tag_crawling[i].get_text() + ''
-            recommand_tag=recommand_tag.split('#')
-            del recommand_tag[0]
-            recommand_tag=' '.join(recommand_tag)
-            print (recommand_tag)
-            print ('추천태그 타입이 뭐니',type(recommand_tag))
-            Noun_recommand_tag=recommand_tag
-            li_rt=title_similarity(Noun_title_sents, Noun_recommand_tag)
-            final_foodName_list.extend(li_rt)
-
-
-
+        
         #추천레시피 제목 크롤링
         recommend_recipes = driver.select('div.caption.jq_elips2')  # 추천 레시피 제목 추출
         sents = list() # 추천레시피 제목 들어갈 리스트 변수

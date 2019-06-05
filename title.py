@@ -137,40 +137,29 @@ class title_scrap:
 
         
         #추천레시피 제목 크롤링
-        recommend_recipes = driver.select('div.caption.jq_elips2')  # 추천 레시피 제목 추출
-        sents = list() # 추천레시피 제목 들어갈 리스트 변수
+        if(driver.select('div.caption.jq_elips2')) :
+            recommend_recipes = driver.select('div.caption.jq_elips2')  # 추천 레시피 제목 추출
+            sents = list() # 추천레시피 제목 들어갈 리스트 변수
 
-        for i in range(4):
-            sents.append(recommend_recipes[i].text)
-        sents = ' '.join(sents)
-        print ('추천레시피 ',sents)
-        print (type(sents))
+            for i in range(4):
+                sents.append(recommend_recipes[i].text)
+            sents = ' '.join(sents)
+            print ('추천레시피 ',sents)
+            print (type(sents))
 
-        s = sents
-        hangul = re.compile('[^ ㄱ-ㅣ가-힣]+')# 한글과 띄어쓰기를 제외한 모든 글자
-        # hangul = re.compile('[^ \u3131-\u3163\uac00-\ud7a3]+')  # 위와 동일
-        dddd = hangul.sub('', s) # 한글과 띄어쓰기를 제외한 모든 부분을 제거
-        print ('엿같네..',dddd)
-        Noun_recommand_recipes = morp(dddd)
-        li_rr = title_similarity(Noun_title_sents, Noun_recommand_recipes)
-        final_foodName_list.extend(li_rr)
+            s = sents
+            hangul = re.compile('[^ ㄱ-ㅣ가-힣]+')# 한글과 띄어쓰기를 제외한 모든 글자
+            # hangul = re.compile('[^ \u3131-\u3163\uac00-\ud7a3]+')  # 위와 동일
+            dddd = hangul.sub('', s) # 한글과 띄어쓰기를 제외한 모든 부분을 제거
+            print ('한글과 띄어쓰기를 제외한 모든 부분제거한 것: ',dddd)
+            Noun_recommand_recipes = morp(dddd)
+            li_rr = title_similarity(Noun_title_sents, Noun_recommand_recipes)
+            final_foodName_list.extend(li_rr)
+        else :
+            Noun_recommand_recipes=''
 
 
-
-        #이부분이 빈도수 체크하는부분
-        # def word_count(text):
-        #
-        #     wordAll = text.split(' ') #공백을 기준으로
-        #     wordDic = {}
-        #     print wordAll
-        #     print type(wordAll)
-        #     for i in wordAll:
-        #         wordCnt = wordAll.count(i)
-        #         wordDic[i] = wordCnt #각각 단어를 key로 하고 빈도수는 value에 삽입.
-        #     print("\n당신이 입력하신 문장의 단어수는 아래와 같습니다.\n")
-        #
-        #     for cnts in wordDic:
-        #         print cnts, wordDic[cnts]
+    
 
         print ('제목(명사만)       :  ',Noun_title_sents)
         if (soup.find("div", {"class": "view_tag"})) :

@@ -10,11 +10,12 @@ import urllib3.request #형태소분석 api는 웹으로 제공하는 서비스�
 import requests#형태소분석 api는 웹으로 제공하는 서비스이기에 이게 필요함.
 import numpy as np  # 행렬 라이브러리 numpy
 import re
+import urllib3
+import json
 
-#secret_key="9004014939174099165" 월 사용량 
-secret_key="6011420040561756864"
-morp_url="http://api.adams.ai/datamixiApi/tms?query="
-option="&lang=kor&analysis=pos&key="
+openApiURL = "http://aiopen.etri.re.kr:8000/WiseNLU"
+accessKey = "a3c24f50-c3ae-4ef7-9fa8-341a5ae711be"
+analysisCode = "morp"
 
 
 class title_scrap:
@@ -33,24 +34,27 @@ class title_scrap:
 
         def morp(text) :
             noun_text = ""
-            query = text # 이거 뭐가 특수문자 이런거 있으면 아예 안들어가지는 것 같음......ㅠ
+            #query = text # 이거 뭐가 특수문자 이런거 있으면 아예 안들어가지는 것 같음......ㅠ
 
-            url_query = morp_url + query + option + secret_key
-            #검색 요청을위해 쿼리 문자열을 입력인자로 Request개체를 생성하기
-            #request=urllib3.request.Request(url_query)
-            response = requests.get(url=url_query)
+            requestJson = {
+                "access_key": accessKey,
+                "argument": {
+                    "text": text,
+                    "analysis_code": analysisCode
+                }
+            }
 
+            http = urllib3.PoolManager()
+            response = http.request(
+                "POST",
+                openApiURL,
+                headers={"Content-Type": "application/json; charset=UTF-8"},
+                body=json.dumps(requestJson)
+            )
 
-            #print response.text
-            #print type(response.text)
-            #print len(response.text)
-            #print response.text[0]
-            #print(response.url)
-            # for i in range(len(response.text)):
-            #     string_tag = string_tag + response.text[i]
-            string_tag = "".join(response.text)
+            string_tag = str(response.data, "utf-8")# 형식은 str, dictionary모양임
             
-            print ("morp결과                      : ",response.text)
+            print ("morp결과                      : ",string_tag)
 
             try:
                 #print eval(string_tag)

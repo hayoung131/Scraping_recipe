@@ -65,7 +65,12 @@ def checkRecipe():
     hit_check = hit_count.hit_count_scrap(bs)
     global hit_standard
     hit_standard = int(hit_check.hit_count_rt())  # 여기서도 조회수를 뽑아낸는 메소드를 호출함.
-
+    
+    title_sents = bs.find("h3").text
+    if (title_sents == ''):
+        print("제목이 없습니다. 크롤링하지않고 넘어갑니다.")
+        return 0;
+    
 
     # if soup.find("dl", {"class": "view_step_tip"}) :
     # <img src="http://recipe1.ezmember.co.kr/img/mobile/icon_star2_on.png">
